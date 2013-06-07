@@ -1,0 +1,23 @@
+{
+  "name": "cerebellum",
+  "description": "Erect javascript view hierarchies like a star.",
+  "url": "http://cerebellum.elbii.com",
+  "keywords": ["hiearchy", "view", "nested", "structure", "browser", "render"],
+  "author": "Jamil Bou Kheir <jamil@elbii.com>",
+  "dependencies": {
+    "backbone" : ">=1.0.0"
+  },
+  "devDependencies": {
+    "phantomjs": "1.9.0-1",
+    "docco": "0.6.1"
+  },
+  "scripts": {
+  },
+  "main": "cerebellum.js",
+  "version": "0.0.1",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elbii/cerebellum.git"
+  }
+}
