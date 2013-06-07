@@ -5,7 +5,6 @@
   "keywords": ["hiearchy", "view", "nested", "structure", "browser", "render"],
   "author": "Jamil Bou Kheir <jamil@elbii.com>",
   "dependencies": {
-    "backbone" : ">=1.0.0"
   },
   "devDependencies": {
     "phantomjs": "1.9.0-1",
