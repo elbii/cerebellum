@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang='en-us'>
+  <head>
+    <title>Books</title>
+
+    <script type='text/html' id='navbar'>
+      <header>
+        <span>Brand</span>
+        <span><a href='#'>Sign in</a></span>
+      </header>
+    </script>
+
+    <script type='text/html' id='landing'>
+      <hr>
+      <h1>Landing page</h1>
+      <p>Here is some cool, catchy stuff</p>
+    </script>
+
+    <script type='text/html' id='list'>
+      <ul>
+        <% this.collection.forEach(function (book) { %>
+          <li><%= book.get('title') %></li>
+        <% }) %>
+      </ul>
+    </script>
+
+    <script type='text/html' id='toolbar'>
+      <a href='#'>Add new book</a>
+    </script>
+
+
+    <script src='jquery-2.0.2.min.js' type='text/javascript'></script>
+    <script src='underscore-min.js' type='text/javascript'></script>
+    <script src='backbone-min.js' type='text/javascript'></script>
+    <script src='../cerebellum.js' type='text/javascript'></script>
+    <script type='text/javascript'>
+      var Book = Backbone.Model.extend({});
+      var BooksCollection = Backbone.Collection.extend({});
+      var Dispatch = _.clone(Backbone.Events);
+
+      var Toolbar = Backbone.View.extend({
+        render: function () {
+          this.$el.html(this.template());
+        },
+        template: _.template($('#toolbar').html())
+      });
+
+      var List = Backbone.View.extend({
+        render: function () {
+          this.$el.html(this.template());
+        },
+        template: _.template($('#list').html())
+      });
+
+      var BooksLayout = Backbone.View.extend({
+        children: [
+          { view: List },
+          { view: Toolbar }
+        ],
+        initialize: function () {
+          _.each(this.children, function (child) {
+            child.instance = new child.view();
+          });
+        },
+        render: function () {
+          _.each(this.children, function (child) {
+            child.instance.render();
+            this.$el.append(child.instance.el);
+          }, this);
+        }
+      });
+
+      var Landing = Backbone.View.extend({
+        render: function () {
+          this.$el.html(this.template());
+        },
+        template: _.template($('#landing').html())
+      });
+
+      var ContentLayout = Backbone.View.extend({
+        children: [
+          { view: BooksLayout },
+          { view: Landing }
+        ],
+        dispose: function () {
+          Dispatch.off('sign_in', this.render);
+        },
+        initialize: function () {
+          Dispatch.on('sign_in', this.render, this);
+          _.each(this.children, function (child) {
+            child.instance = new child.view();
+          });
+        },
+        render: function () {
+          var view;
+
+          if (window.currentUser) {
+            view = this.children[0];
+          } else {
+            view = this.children[1];
+          }
+
+          view.instance.render();
+          this.$el.append(view.instance.el);
+        }
+      });
+
+      var Navbar = Backbone.View.extend({
+        dispose: function () {
+          Dispatch.off('sign_in', this.render);
+        },
+        initialize: function () {
+          Dispatch.on('sign_in', this.render, this);
+        },
+        render: function () {
+          this.$el.html(this.template());
+        },
+        template: _.template($('#navbar').html())
+      });
+
+      var AppLayout = Backbone.View.extend({
+        children: [
+          { view: Navbar },
+          { view: ContentLayout }
+        ],
+        el: 'body',
+        initialize: function () {
+          _.each(this.children, function (child) {
+            child.instance = new child.view();
+          });
+
+          this.render();
+        },
+        render: function () {
+          _.each(this.children, function (child) {
+            child.instance.render();
+            this.$el.append(child.instance.el);
+          }, this);
+        }
+      });
+
+      $(document).ready(function () {
+        new AppLayout();
+      });
+    </script>
+  </head>
+  <body>
+  </body>
+</html>
