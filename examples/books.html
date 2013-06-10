@@ -3,19 +3,28 @@
   <head>
     <title>Books</title>
 
+    <link rel='stylesheet' href='bootstrap.css' />
+    <link rel='stylesheet' href='bootstrap-responsive.css' />
+
     <script type='text/html' id='navbar'>
-      <header>
-        <span>Brand</span>
-        <% if (window.user) { %>
-          <span>Hello, <%= window.user.email %></span>
-        <% } else { %>
-          <form action='#'>
-            <input type='email' placeholder='email'>
-            <input type='password' placeholder='password'>
-            <button type='submit'>Sign In</button>
-          </form>
-        <% } %>
-      </header>
+      <div class='navbar-inner'>
+        <a class='brand' href='#'>Books</a>
+        <ul class='nav pull-right'>
+          <% if (window.user) { %>
+            <li><a href='#'>Hello, <%= window.user.email %></a></li>
+            <li><a href='#'>Sign out</a></li>
+          <% } else { %>
+            <li>
+              <form action='#' class='form form-inline'>
+                <input type='email' placeholder='email'>
+                <input type='password' placeholder='password'>
+                <button type='submit' class='btn'>Sign In</button>
+              </form>
+            </li>
+            <li><%= this.error %></li>
+          <% } %>
+        </ul>
+      </div>
       <hr>
     </script>
 
@@ -34,141 +43,21 @@
     </script>
 
     <script type='text/html' id='toolbar'>
-      <a href='#'>Add new book</a>
+      <form action='#' class='form'>
+        <input placeholder='title'>
+        <button type='submit' class='btn'>Add book</button>
+      </form>
+      <p><%= this.error %></p>
     </script>
 
 
     <script src='jquery-2.0.2.min.js' type='text/javascript'></script>
     <script src='underscore-min.js' type='text/javascript'></script>
     <script src='backbone-min.js' type='text/javascript'></script>
+    <script src='bootstrap.min.js' type='text/javascript'></script>
     <script src='../cerebellum.js' type='text/javascript'></script>
-    <script type='text/javascript'>
-      var Book = Backbone.Model.extend({});
-      var BooksCollection = Backbone.Collection.extend({});
-      var Dispatch = _.clone(Backbone.Events);
 
-      var Toolbar = Backbone.View.extend({
-        render: function () {
-          this.$el.html(this.template());
-        },
-        template: _.template($('#toolbar').html())
-      });
-
-      var List = Backbone.View.extend({
-        render: function () {
-          this.$el.html(this.template());
-        },
-        template: _.template($('#list').html())
-      });
-
-      var BooksLayout = Backbone.View.extend({
-        children: [
-          { view: List },
-          { view: Toolbar }
-        ],
-        initialize: function () {
-          _.each(this.children, function (child) {
-            child.instance = new child.view();
-          });
-        },
-        render: function () {
-          _.each(this.children, function (child) {
-            child.instance.render();
-            this.$el.append(child.instance.el);
-          }, this);
-        }
-      });
-
-      var Landing = Backbone.View.extend({
-        render: function () {
-          this.$el.html(this.template());
-        },
-        template: _.template($('#landing').html())
-      });
-
-      var ContentLayout = Backbone.View.extend({
-        children: [
-          { view: BooksLayout },
-          { view: Landing }
-        ],
-        dispose: function () {
-          Dispatch.off('sign_in', this.render);
-        },
-        initialize: function () {
-          Dispatch.on('sign_in', this.render, this);
-          _.each(this.children, function (child) {
-            child.instance = new child.view();
-          });
-        },
-        render: function () {
-          var view;
-
-          if (window.user) {
-            view = this.children[0];
-          } else {
-            view = this.children[1];
-          }
-
-          view.instance.render();
-
-          this.$el.empty();
-          this.$el.append(view.instance.el);
-        }
-      });
-
-      var Navbar = Backbone.View.extend({
-        dispose: function () {
-          Dispatch.off('sign_in', this.render);
-        },
-        events: {
-          'submit form': 'submit'
-        },
-        initialize: function () {
-          Dispatch.on('sign_in', this.render, this);
-        },
-        render: function () {
-          this.$el.html(this.template());
-        },
-        submit: function () {
-          var email = $('[type=email]').val();
-
-          if (email.length > 0) {
-            window.user = {
-              email: email,
-              books: new BooksCollection()
-            };
-            Dispatch.trigger('sign_in');
-          } else {
-            this.error = 'Invalid.';
-          }
-        },
-        template: _.template($('#navbar').html())
-      });
-
-      var AppLayout = Backbone.View.extend({
-        children: [
-          { view: Navbar },
-          { view: ContentLayout }
-        ],
-        el: 'body',
-        initialize: function () {
-          _.each(this.children, function (child) {
-            child.instance = new child.view();
-          });
-
-          this.render();
-        },
-        render: function () {
-          _.each(this.children, function (child) {
-            child.instance.render();
-            this.$el.append(child.instance.el);
-          }, this);
-        }
-      });
-
-      $(document).ready(function () {
-        new AppLayout();
-      });
+    <script src='books.js' type='text/javascript'></script>
     </script>
   </head>
   <body>
