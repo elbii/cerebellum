@@ -6,19 +6,28 @@
     <script type='text/html' id='navbar'>
       <header>
         <span>Brand</span>
-        <span><a href='#'>Sign in</a></span>
+        <% if (window.user) { %>
+          <span>Hello, <%= window.user.email %></span>
+        <% } else { %>
+          <form action='#'>
+            <input type='email' placeholder='email'>
+            <input type='password' placeholder='password'>
+            <button type='submit'>Sign In</button>
+          </form>
+        <% } %>
       </header>
+      <hr>
     </script>
 
     <script type='text/html' id='landing'>
-      <hr>
       <h1>Landing page</h1>
       <p>Here is some cool, catchy stuff</p>
     </script>
 
     <script type='text/html' id='list'>
+      <p>Books:</p>
       <ul>
-        <% this.collection.forEach(function (book) { %>
+        <% window.user.books.forEach(function (book) { %>
           <li><%= book.get('title') %></li>
         <% }) %>
       </ul>
@@ -94,13 +103,15 @@
         render: function () {
           var view;
 
-          if (window.currentUser) {
+          if (window.user) {
             view = this.children[0];
           } else {
             view = this.children[1];
           }
 
           view.instance.render();
+
+          this.$el.empty();
           this.$el.append(view.instance.el);
         }
       });
@@ -109,11 +120,27 @@
         dispose: function () {
           Dispatch.off('sign_in', this.render);
         },
+        events: {
+          'submit form': 'submit'
+        },
         initialize: function () {
           Dispatch.on('sign_in', this.render, this);
         },
         render: function () {
           this.$el.html(this.template());
+        },
+        submit: function () {
+          var email = $('[type=email]').val();
+
+          if (email.length > 0) {
+            window.user = {
+              email: email,
+              books: new BooksCollection()
+            };
+            Dispatch.trigger('sign_in');
+          } else {
+            this.error = 'Invalid.';
+          }
         },
         template: _.template($('#navbar').html())
       });
