@@ -1,3 +1,7 @@
+# WORK IN PROGRESS
+This repo is currently a work in progress. It's a scratchpad while we finalize
+the initial Cerebellum release. Please stand by.
+
 # About
 Cerebellum is a tiny library that provides a declarative way to build javascript
 view hiearchies. It handles view nesting, DOM event binding, and re-rendering so
