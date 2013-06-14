@@ -11,14 +11,9 @@ var Toolbar = Backbone.View.extend({
   },
   submit: function () {
     var title = $('input').val();
-
     if (title.length > 0) {
-      delete this.error;
       window.user.books.add(new Book({ title: title }));
       Dispatch.trigger('toolbar:add');
-    } else {
-      this.error = 'Invalid title.';
-      this.render();
     }
   },
   template: _.template($('#toolbar').html())
@@ -52,18 +47,12 @@ var BooksContainer = Backbone.View.extend({
       child.instance.render();
       this.$el.append(child.instance.el);
     }, this);
-  },
-  conditional: function () {
-    return window.user !== undefined;
   }
 });
 
 var Landing = Backbone.View.extend({
   render: function () {
     this.$el.html(this.template());
-  },
-  conditional: function () {
-    return window.user === undefined;
   },
   template: _.template($('#landing').html())
 });
@@ -75,21 +64,33 @@ var ContentContainer = Backbone.View.extend({
   ],
   dispose: function () {
     Dispatch.off('sign_in', this.render);
+    Dispatch.on('app_router:books', this.renderBooks);
+    Dispatch.on('app_router:index', this.renderLanding);
   },
   initialize: function () {
     Dispatch.on('sign_in', this.render, this);
+    Dispatch.on('app_router:books', this.renderBooks, this);
+    Dispatch.on('app_router:index', this.renderLanding, this);
     _.each(this.children, function (child) {
       child.instance = new child.view();
     });
   },
   render: function () {
+    // this.$el.empty();
+    // _.each(this.children, function (child) {
+    //   child.instance.render();
+    //   this.$el.append(child.instance.el);
+    // }, this);
+  },
+  renderBooks: function () {
     this.$el.empty();
-    _.each(this.children, function (child) {
-      if (child.instance.conditional()) {
-        child.instance.render();
-        this.$el.append(child.instance.el);
-      }
-    }, this);
+    this.children[0].instance.render();
+    this.$el.append(this.children[0].instance.el);
+  },
+  renderLanding: function () {
+    this.$el.empty();
+    this.children[1].instance.render();
+    this.$el.append(this.children[1].instance.el);
   }
 });
 
@@ -98,9 +99,7 @@ var Navbar = Backbone.View.extend({
   dispose: function () {
     Dispatch.off('sign_in', this.render);
   },
-  events: {
-    'submit form': 'submit'
-  },
+  events: { 'submit form': 'submit' },
   initialize: function () {
     Dispatch.on('sign_in', this.render, this);
   },
@@ -109,18 +108,11 @@ var Navbar = Backbone.View.extend({
   },
   submit: function () {
     var email = $('[type=email]').val();
-
-    if (email.length > 0) {
-      delete this.error;
-      window.user = {
+    window.user = {
         email: email,
         books: new BooksCollection()
-      };
-      Dispatch.trigger('sign_in');
-    } else {
-      this.error = 'Invalid login.';
-      this.render();
-    }
+    };
+    Dispatch.trigger('sign_in');
   },
   template: _.template($('#navbar').html())
 });
@@ -135,7 +127,6 @@ var AppContainer = Backbone.View.extend({
     _.each(this.children, function (child) {
       child.instance = new child.view();
     });
-
     this.render();
   },
   render: function () {
@@ -143,12 +134,31 @@ var AppContainer = Backbone.View.extend({
       child.instance.render();
       this.$el.append(child.instance.el);
     }, this);
-
     $('body').append(this.el);
   }
 });
 
-$(document).ready(function () {
-  new AppContainer();
+var AppRouter = Backbone.Router.extend({
+  routes: {
+    '': 'index',
+    'books': 'books'
+  },
+  index: function () {
+    Dispatch.trigger('app_router:index');
+  },
+  books: function () {
+    if (window.user) {
+      window.user.books = new BooksCollection();
+      Dispatch.trigger('app_router:books');
+    } else {
+      Backbone.history.navigate('/', true);
+    }
+  }
 });
 
+$(document).ready(function () {
+  Backbone.history.start({pushState: true});
+
+  new AppContainer();
+  new AppRouter();
+});
