@@ -24,8 +24,8 @@ hiearchy defined as follows:
       name: RootView, // class of View to render
       el: '#content', // element to render into
       if: true, // value or function that determines whether this view is shown
-      renderMethod: 'render', // method to be called to render this view
-      disposeMethod: 'dispose', // method to be caled to dispose this view
+      renderfunction: 'render', // function to be called to render this view
+      disposefunction: 'dispose', // function to be caled to dispose this view
       childViews: [
         {
           name: ChildView,
