@@ -37,5 +37,4 @@ hiearchy defined as follows:
       ]
     }
 
-remove bitdeli
 
